@@ -1,29 +1,102 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>'93 Pickup 22RE Tracker</title>
-<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Garage Tracker</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="22RE Tracker"><meta name="theme-color" content="#1f3a5f">
+<meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Garage">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#111214" media="(prefers-color-scheme: dark)">
+<meta name="app-build" content="garage-v2">
 <style>
-:root{color-scheme:light dark;--b:#ccc;--m:#777}
-body{font-family:-apple-system,system-ui,sans-serif;margin:0;padding:12px 12px 40px;max-width:1100px;margin:auto}
-h1{font-size:20px;margin:4px 0}h2{font-size:16px;margin:18px 0 6px}.m{color:var(--m);font-size:13px}
-.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;position:sticky;top:0;background:Canvas;padding:6px 0;z-index:2}
-.tabs button.on{background:#1f3a5f;color:#fff}button{padding:6px 10px;border:1px solid var(--b);border-radius:6px;background:transparent;color:inherit;font-size:14px}
-input,select,textarea{font-size:16px;padding:5px;border:1px solid var(--b);border-radius:5px;background:Canvas;color:inherit;min-width:0;box-sizing:border-box}
-.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-bottom:1px solid var(--b);padding:6px 0}
-.row label{flex:1 1 260px;display:flex;gap:8px;align-items:center}.done span{text-decoration:line-through;color:var(--m)}
-table{border-collapse:collapse;width:100%;font-size:13px}td,th{border-bottom:1px solid var(--b);padding:4px;text-align:left;vertical-align:top}
-.fb{display:flex;flex-wrap:wrap;gap:10px}.br{flex:1 1 250px;border:1px solid var(--b);border-radius:8px;padding:10px}.head{flex:1 1 200px;border:2px solid #1f3a5f;border-radius:8px;padding:10px;font-weight:600}
-.c{border-left:3px solid #999;padding-left:8px;margin:6px 0}.c a{cursor:pointer;text-decoration:underline dotted}.mk{cursor:pointer;font-size:12px;margin-left:6px}
-.suspect{border-color:#d4a017;color:#b8860b}.ruled{border-color:#2e8b57;color:#2e8b57}.confirmed{border-color:#c0392b;color:#c0392b}
-.note{background:rgba(31,58,95,.1);padding:8px;border-radius:6px;margin:6px 0}.pass{color:#2e8b57}.fail{color:#c0392b}
+:root{--bg:#f6f7f9;--surface:#fff;--sunken:#f0f2f5;--text:#16181d;--text2:#555b66;--text3:#868c97;--border:#e3e6eb;--border2:#cfd4dc;--accent:#1d5fd1;--accent-ink:#fff;--accent-soft:#e8effc;--ok:#1f7a4d;--warn:#a86400;--bad:#b42318;
+--s1:8px;--s2:16px;--s3:24px;--s4:32px;--r:10px;--shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.04);
+--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#111214;--surface:#1a1c20;--sunken:#14161a;--text:#eceef2;--text2:#a9afba;--text3:#7c828d;--border:#2a2d33;--border2:#3a3e46;--accent:#5b8ff0;--accent-ink:#0b1020;--accent-soft:#1c2a45;--ok:#4cc38a;--warn:#e0a33a;--bad:#f0766b;--shadow:none}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 var(--font)}
+button,input,select,textarea{font:inherit;color:inherit}
+.bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:var(--s1);background:var(--surface);border-bottom:1px solid var(--border);padding:calc(var(--s1) + env(safe-area-inset-top)) calc(var(--s2) + env(safe-area-inset-right)) var(--s1) calc(var(--s1) + env(safe-area-inset-left));min-height:56px}
+.icon-btn{width:44px;height:44px;display:grid;place-items:center;border:0;background:transparent;border-radius:var(--r);cursor:pointer}
+.icon-btn:hover{background:var(--sunken)}.icon-btn svg{width:22px;height:22px}
+.bar-title{flex:1;min-width:0}.bar-title h1{margin:0;font-size:17px;font-weight:600;line-height:1.2}
+.veh-chip{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;padding:2px 0;color:var(--text2);font-size:13px;cursor:pointer;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.veh-chip:after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);margin-left:4px;flex:none}
+.scrim{position:fixed;inset:0;background:rgba(10,12,16,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:min(300px,84vw);background:var(--surface);border-right:1px solid var(--border);transform:translateX(-100%);transition:transform .22s ease;z-index:31;display:flex;flex-direction:column;padding:calc(var(--s2) + env(safe-area-inset-top)) 0 env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.drawer.open{transform:none}
+.drawer .brand{padding:0 var(--s2) var(--s2);border-bottom:1px solid var(--border);margin-bottom:var(--s1)}
+.brand b{display:block;font-size:16px}.brand span{font-size:13px;color:var(--text3)}
+.nav{list-style:none;margin:0;padding:0 var(--s1)}
+.nav button{width:100%;text-align:left;min-height:44px;padding:0 var(--s2);border:0;background:transparent;border-radius:var(--r);cursor:pointer;font-weight:500;display:flex;align-items:center;justify-content:space-between}
+.nav button:hover{background:var(--sunken)}.nav button[aria-current=page]{background:var(--accent-soft);color:var(--accent)}
+.nav .sep{height:1px;background:var(--border);margin:var(--s1) var(--s2)}
+.nav .count{font-size:12px;color:var(--text3);font-weight:400}
+main{max-width:880px;margin:0 auto;padding:var(--s2) calc(var(--s2) + env(safe-area-inset-right)) calc(var(--s4) + env(safe-area-inset-bottom)) calc(var(--s2) + env(safe-area-inset-left))}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);margin-bottom:var(--s2);overflow:hidden}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:var(--s1);padding:12px var(--s2);border-bottom:1px solid var(--border)}
+.card-h h2{margin:0;font-size:15px;font-weight:600}.card-h .meta{font-size:13px;color:var(--text3)}
+.card-b{padding:var(--s2)}.card-b.flush{padding:0}
+.page-h{margin:var(--s1) 0 var(--s2)}.page-h p{margin:4px 0 0;color:var(--text2);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s1);margin-bottom:var(--s2)}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.stat b{display:block;font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}.stat span{font-size:12px;color:var(--text3)}
+.btn{min-height:44px;padding:0 var(--s2);border:1px solid var(--border2);background:var(--surface);border-radius:var(--r);cursor:pointer;font-weight:500;font-size:14px}
+.btn:hover{background:var(--sunken)}.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--bad)}.btn.sm{min-height:36px;padding:0 12px;font-size:13px}.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:var(--s1)}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}.field>span{font-size:12px;font-weight:500;color:var(--text2)}
+.input,select.input,textarea.input{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);font-size:16px}
+.input:focus,.btn:focus-visible,.icon-btn:focus-visible,.nav button:focus-visible,.check:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form .full{grid-column:1/-1}
+.err{color:var(--bad);font-size:13px;min-height:1em}
+.item{padding:12px var(--s2);border-top:1px solid var(--border)}.item:first-child{border-top:0}
+.item-top{display:flex;gap:12px;align-items:flex-start}
+.check{appearance:none;flex:none;width:24px;height:24px;margin:0;border:1.5px solid var(--border2);border-radius:6px;background:var(--surface);cursor:pointer;display:grid;place-items:center}
+.check:checked{background:var(--accent);border-color:var(--accent)}
+.check:checked:after{content:"";width:6px;height:11px;border:solid var(--accent-ink);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.item-label{flex:1;padding-top:2px}.done .item-label{color:var(--text3);text-decoration:line-through}
+.item-fields{display:grid;grid-template-columns:1fr 1fr;gap:var(--s1);margin-top:var(--s1);padding-left:36px}.item-fields .notes{grid-column:1/-1}
+.item-fields .input{min-height:40px;padding:8px 10px;font-size:16px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}.tbl th{font-size:12px;font-weight:500;color:var(--text3);text-align:left;padding:8px var(--s2);border-bottom:1px solid var(--border)}
+.tbl td{padding:10px var(--s2);border-bottom:1px solid var(--border);vertical-align:top}.tbl tr:last-child td{border-bottom:0}.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl-wrap{overflow-x:auto}
+.list-row{display:flex;gap:12px;align-items:flex-start;padding:12px var(--s2);border-top:1px solid var(--border)}.list-row:first-child{border-top:0}
+.list-row .grow{flex:1;min-width:0}.sub{font-size:13px;color:var(--text3)}
+.pill{display:inline-block;font-size:12px;font-weight:500;padding:2px 8px;border-radius:999px;border:1px solid var(--border2);color:var(--text2);white-space:nowrap}
+.pill.ok{color:var(--ok);border-color:currentColor}.pill.bad{color:var(--bad);border-color:currentColor}.pill.warn{color:var(--warn);border-color:currentColor}.pill.acc{color:var(--accent);border-color:currentColor}
+.garage{display:grid;grid-template-columns:1fr;gap:var(--s2)}@media(min-width:700px){.garage{grid-template-columns:1fr 1fr}}
+.veh{margin:0}.veh.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.veh h3{margin:0;font-size:17px;font-weight:600}.veh .eng{color:var(--text2);font-size:14px;margin-top:2px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;margin:12px 0}.kv dt{color:var(--text3)}.kv dd{margin:0;font-family:var(--font)}.mono{font-family:var(--mono);font-size:13px}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:0 calc(-1*var(--s2)) 12px}
+.mini div{padding:10px var(--s2)}.mini div+div{border-left:1px solid var(--border)}.mini b{display:block;font-variant-numeric:tabular-nums}.mini span{font-size:12px;color:var(--text3)}
+.fb{display:grid;grid-template-columns:1fr;gap:var(--s1)}@media(min-width:700px){.fb{grid-template-columns:1fr 1fr}}
+.branch{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}.branch h4{margin:0;padding:8px 12px;font-size:13px;font-weight:600;background:var(--sunken);border-bottom:1px solid var(--border)}
+.culprit{padding:10px 12px;border-top:1px solid var(--border);border-left:3px solid transparent}.culprit:first-of-type{border-top:0}
+.culprit.suspect{border-left-color:var(--warn)}.culprit.ruled{border-left-color:var(--ok)}.culprit.confirmed{border-left-color:var(--bad)}
+.culprit-top{display:flex;gap:var(--s1);align-items:center;justify-content:space-between}
+.linkish{border:0;background:none;padding:4px 0;text-align:left;font-weight:500;cursor:pointer;color:var(--text)}.linkish:hover{color:var(--accent)}
+.tag{border:1px solid var(--border2);background:var(--surface);border-radius:999px;font-size:12px;min-height:32px;padding:0 10px;cursor:pointer;color:var(--text2);white-space:nowrap}
+.tag.suspect{color:var(--warn);border-color:currentColor}.tag.ruled{color:var(--ok);border-color:currentColor}.tag.confirmed{color:var(--bad);border-color:currentColor}
+.head{border:1px solid var(--accent);background:var(--accent-soft);border-radius:var(--r);padding:12px;margin-bottom:var(--s1);font-weight:600}
+.head span{display:block;font-size:12px;font-weight:500;color:var(--accent)}
+.note{background:var(--accent-soft);border-radius:8px;padding:10px 12px;font-size:14px;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:calc(var(--s3) + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px var(--s2);border-radius:8px;font-size:14px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none}.toast.show{opacity:1}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:var(--s1)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media(max-width:420px){.form{grid-template-columns:1fr}.stats b{font-size:18px}}
 </style></head><body>
-<h1>'93 Toyota Pickup 22RE Maintenance Tracker</h1>
-<div class="m">1993 Toyota Pickup, regular cab, long bed · 22RE 2.4L EFI (timing chain; likely 2WD, verify) · VIN 4TARN01P5PZ081471 · Built Sept 1993, Fremont CA<br>
-Symptoms: rough idle (improving as of 2026-10-31); stumble at wide-open throttle; no check engine light; oscillation when braking</div>
-<div class="m" id="stats"></div>
-<div class="tabs" id="tabs"></div><div id="app"></div>
+<header class="bar">
+ <button class="icon-btn" id="menuBtn" aria-label="Open navigation" aria-controls="drawer" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+ <div class="bar-title"><h1 id="viewTitle">Garage</h1><button class="veh-chip" id="vehChip" aria-label="Switch vehicle"></button></div>
+</header>
+<div class="scrim" id="scrim"></div>
+<nav class="drawer" id="drawer" aria-label="Main navigation" aria-hidden="true" inert>
+ <div class="brand"><b>Garage Tracker</b><span>Maintenance and diagnostics</span></div>
+ <ul class="nav" id="nav"></ul>
+</nav>
+<main id="app" tabindex="-1"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const RAW=[
 ["Known symptoms (starter items)",["Rough idle: monitor, improving on its own as of 2026-10-31","Stumble at wide-open throttle: diagnose (see idle/throttle section)","No check engine light: confirm bulb lights at key-on, check for stored codes","Oscillation when braking: re-check after front rotor replacement and tire balance"]],
@@ -55,57 +128,165 @@ const GENERIC={id:"generic",name:"General (all systems)",keys:[],branches:[["Vac
 const symById=id=>LIB.find(s=>s.id===id)||GENERIC;
 const match=q=>{const w=q.toLowerCase().split(/[^a-z]+/).filter(x=>x.length>2);let b=GENERIC,sc=0;LIB.forEach(s=>{const n=w.filter(x=>s.keys.some(k=>k.startsWith(x)||x.startsWith(k))).length;if(n>sc){sc=n;b=s}});return b};
 const SEED_CASE={id:"case-1",symptomId:"rough-wot",title:'Rough idle + stumble at wide-open throttle ("on top of the throttle")',opened:"2026-10-31",notes:"Idle improving on its own as of 2026-10-31. No check engine light.",marks:{}};
-const seed=()=>({sections:RAW.map(([t,l],i)=>({title:t,items:l.map((label,j)=>({id:`s${i+1}-${j+1}`,label,checked:false,notes:"",part:"",cost:""}))})),log:[],cases:[SEED_CASE],tests:[]});
-const norm=s=>({sections:s.sections,log:s.log||[],cases:s.cases&&s.cases.length?s.cases:[SEED_CASE],tests:s.tests||[]});
+const IAC_NOTE="The 1993 22RE has no electronic IAC valve. Idle air comes from the auxiliary air valve, the idle speed adjust screw, and the throttle body air passage.";
+const GENERIC_RAW=[["Routine service",["Engine oil and filter","Check all fluid levels and leaks","Transmission fluid","Differential / transfer case fluid (if equipped)","Air filter","Cabin filter (if equipped)","Drive belts","Coolant and heater hoses"]],
+["Ignition",["Spark plugs","Plug wires / coils"]],["Fuel",["Fuel filter (if serviceable)"]],["Cooling",["Coolant condition and level","Radiator, cap, thermostat"]],
+["Brakes",["Pads and rotors / shoes and drums","Brake fluid flush","Parking brake"]],["Suspension and steering",["Ball joints, tie rods, bushings","Shocks / struts"]],
+["Battery and charging",["Battery test and terminals","Charging voltage"]],["Tires",["Rotation, balance, pressures","Tread, age, alignment"]]];
+const mkSections=raw=>raw.map(([t,l],i)=>({title:t,items:l.map((label,j)=>({id:`s${i+1}-${j+1}`,label,checked:false,notes:"",part:"",cost:"",updated:""}))}));
+const TRUCK_INFO={year:"1993",make:"Toyota",model:"Pickup",trim:"",cab:"Regular cab",bed:"Long bed",engine:"22RE 2.4L SOHC EFI (timing chain)",vin:"4TARN01P5PZ081471",buildDate:"Sept 1993",buildPlant:"Fremont, CA",mileage:"",notes:"Likely 2WD per VIN, verify.",
+ symptoms:["Rough idle (improving on its own as of 2026-10-31)","Stumble at wide-open throttle","No check engine light","Oscillation when braking"]};
+const truck=(old)=>({id:"v1",is22re:true,info:{...TRUCK_INFO},sections:old&&old.sections?old.sections:mkSections(RAW),log:old&&old.log||[],cases:old&&old.cases&&old.cases.length?old.cases:[{...SEED_CASE,marks:{}}],tests:old&&old.tests||[]});
+const newGarage=()=>({version:2,activeVehicleId:"v1",vehicles:[truck()],ui:{view:"garage",filterVeh:"all",filterStatus:"all"}});
+const migrate=s=>{if(!s)return newGarage();if(s.vehicles&&s.vehicles.length){s.ui=Object.assign({view:"garage",filterVeh:"all",filterStatus:"all"},s.ui||{});if(!s.vehicles.some(v=>v.id===s.activeVehicleId))s.activeVehicleId=s.vehicles[0].id;s.vehicles.forEach(v=>{v.log=v.log||[];v.cases=v.cases||[];v.tests=v.tests||[]});return s}
+ if(s.sections){const g=newGarage();g.vehicles[0]=truck(s);return g}return newGarage()};
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
-const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-// IndexedDB storage
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>"$"+(n||0).toFixed(2);
 let db;const idb=()=>new Promise((res,rej)=>{const r=indexedDB.open("tracker22re",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>{db=r.result;res()};r.onerror=()=>rej(r.error)});
 const load=()=>new Promise(res=>{const r=db.transaction("kv").objectStore("kv").get("state");r.onsuccess=()=>res(r.result);r.onerror=()=>res(null)});
-const save=()=>{try{db.transaction("kv","readwrite").objectStore("kv").put(st,"state")}catch(e){}};
-let st=seed(),view="checklist",caseId="case-1",draft={culprit:"",test:"",result:"",outcome:"inconclusive",notes:""},msg="",query="";
+const save=()=>{try{db.transaction("kv","readwrite").objectStore("kv").put(G,"state")}catch(e){}};
+let G=newGarage(),caseId=null,draft={culprit:"",test:"",result:"",outcome:"inconclusive",notes:""},query="",editId=null,ioText="",flash="";
+const V=()=>G.vehicles.find(v=>v.id===G.activeVehicleId)||G.vehicles[0];
+const vName=v=>[v.info.year,v.info.make,v.info.model].filter(Boolean).join(" ")||"Untitled vehicle";
+const vItems=v=>v.sections.flatMap(s=>s.items.map(it=>({it,sec:s.title})));
+const vSpent=v=>v.log.reduce((a,l)=>a+(l.cost||0),0);
+const openCases=v=>v.cases.filter(c=>!Object.values(c.marks||{}).includes("confirmed")).length;
 const set=fn=>{fn();save();render()};
-const items=()=>st.sections.flatMap(s=>s.items);
-function upd(id,f,v,logIt){set(()=>{const it=items().find(x=>x.id===id);it[f]=v;
- if(f==="checked"&&v)st.log.push({date:today(),itemId:id,item:it.label,action:"Completed",part:it.part,cost:parseFloat(it.cost)||0});
- if(logIt&&v)st.log.push({date:today(),itemId:id,item:it.label,action:f==="notes"?"Note: "+v:f==="part"?"Part added":"Cost added",part:it.part,cost:f==="cost"?parseFloat(v)||0:0});})}
-function doImport(txt){try{const d=JSON.parse(txt);const arr=Array.isArray(d)?d:Array.isArray(d.entries)?d.entries:(d.sections||d.cases||d.tests)?[]:[d];
- set(()=>{if(d.sections&&d.log)st=norm(d);else{
-  if(d.sections)st.sections=d.sections.map(s=>({title:s.title,items:s.items.map(it=>({id:it.id,label:it.label,checked:!!it.checked,notes:it.notes||"",part:it.part||"",cost:it.cost?String(it.cost):""}))}));
-  if(Array.isArray(d.cases))d.cases.forEach(c=>{if(!st.cases.some(x=>x.id===c.id))st.cases.push({marks:{},...c})});
-  if(Array.isArray(d.tests))st.tests.push(...d.tests);}
-  arr.forEach(e=>{const id=e.itemId||e.id||"";const it=items().find(i=>i.id===id);
-   if(!it&&e.label){const t=e.section||"Added from conversation";let s=st.sections.find(x=>x.title===t);if(!s){s={title:t,items:[]};st.sections.push(s)}s.items.push({id:id||"x-"+Date.now()+"-"+st.log.length,label:e.label,checked:!!e.checked,notes:e.notes||"",part:e.part||"",cost:e.cost?String(e.cost):""})}
-   else if(it){if(e.checked!=null)it.checked=e.checked;if(e.notes!=null)it.notes=e.notes;if(e.part!=null)it.part=e.part;if(e.cost!=null)it.cost=String(e.cost)}
-   st.log.push({date:e.date||today(),itemId:id,item:e.label||e.item||id,action:e.action||(e.checked?"Completed":"Imported"),part:e.part||"",cost:parseFloat(e.cost)||0})});
-  msg="Imported."})}catch(e){msg="Could not read that JSON.";render()}}
-function tabs(){document.getElementById("tabs").innerHTML=[["checklist","Checklist"],["log","Maintenance log"],["diag","Diagnostics"],["io","Import / export"]].map(([v,l])=>`<button class="${v===view?"on":""}" onclick="view='${v}';render()">${l}</button>`).join("")}
-function render(){tabs();const all=items(),done=all.filter(i=>i.checked).length,tot=st.log.reduce((a,l)=>a+(l.cost||0),0);
- document.getElementById("stats").textContent=`${done} / ${all.length} items done · ${st.log.length} log entries · $${tot.toFixed(2)} spent · ${st.tests.length} tests logged`;
- const A=document.getElementById("app");let h="";
- if(view==="checklist")st.sections.forEach(s=>{h+=`<h2>${esc(s.title)}</h2>`;s.items.forEach(it=>{h+=`<div class="row ${it.checked?"done":""}"><label><input type="checkbox" data-id="${it.id}" ${it.checked?"checked":""} onchange="upd(this.dataset.id,'checked',this.checked)"><span>${esc(it.label)}</span></label>`+
-  ["notes","part","cost"].map(f=>`<input style="flex:${f==="notes"?"2 1 180px":f==="part"?"1 1 100px":"0 1 80px"}" placeholder="${f==="notes"?"Notes":f==="part"?"Part #":"Cost $"}" value="${esc(it[f])}" data-id="${it.id}" onchange="upd(this.dataset.id,'${f}',this.value,true)">`).join("")+`</div>`})});
- if(view==="log"){let r=0;const rows=[...st.log].sort((a,b)=>a.date.localeCompare(b.date));h=`<h2>Maintenance log</h2>`+(rows.length?`<table><tr><th>Date</th><th>Item</th><th>Action</th><th>Part</th><th>Cost</th><th>Running</th></tr>`+rows.map(l=>{r+=l.cost||0;return `<tr><td>${l.date}</td><td>${esc(l.item)}</td><td>${esc(l.action)}</td><td>${esc(l.part)}</td><td>${l.cost?"$"+l.cost.toFixed(2):""}</td><td>$${r.toFixed(2)}</td></tr>`}).join("")+`</table>`:`<p class="m">Entries appear when you check an item or add a note, part or cost.</p>`)}
- if(view==="diag"){const cur=st.cases.find(c=>c.id===caseId)||st.cases[0],sym=symById(cur.symptomId);
-  h=`<h2>Case</h2><div class="row"><select style="flex:1 1 240px" onchange="caseId=this.value;render()">${st.cases.map(c=>`<option value="${c.id}" ${c.id===cur.id?"selected":""}>${c.opened} · ${esc(c.title)}</option>`).join("")}</select>
-  <select style="flex:1 1 200px" onchange="query=symById(this.value).name;render()"><option value="">Pick a symptom…</option>${LIB.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select>
-  <input id="q" style="flex:2 1 200px" placeholder="Or type a symptom" value="${esc(query)}" oninput="query=this.value" onkeydown="if(event.key==='Enter')openCase()"><button onclick="openCase()">Open new case</button></div>
-  <p class="m">Opened ${cur.opened} · Matched: ${esc(sym.name)} · ${esc(cur.notes)}</p>`+
-  (/\biac\b|idle air control/i.test(query+" "+cur.title)?`<div class="note">The 1993 22RE has no electronic IAC valve. Idle air comes from the auxiliary air valve, the idle speed adjust screw, and the throttle body air passage.</div>`:"")+
-  `<h2>Fishbone: ${esc(sym.name)}</h2><p class="m">Tap a culprit to prefill a test entry; tap its status to cycle suspect → ruled out → confirmed. "Verify" specs must be checked against the FSM or underhood label.</p><div class="fb">`+
-  sym.branches.map(([sys,cs])=>`<div class="br"><b>${esc(sys)} ⟶</b>`+cs.map(([n,t])=>{const m=cur.marks[n]||"";const cl=m==="ruled out"?"ruled":m;return `<div class="c ${cl}"><a data-n="${esc(n)}" data-t="${esc(t)}" onclick="draft.culprit=this.dataset.n;draft.test=this.dataset.t;render()">${esc(n)}</a><span class="mk ${cl}" data-n="${esc(n)}" onclick="mark(this.dataset.n)">[${m||"untested"}]</span><div class="m">Test: ${esc(t)}</div></div>`}).join("")+`</div>`).join("")+
-  `<div class="head">Head: ${esc(cur.title)}</div></div><h2>What I tested</h2><div class="row">`+
-  [["culprit","Culprit tested"],["test","Test done"],["result","Result / finding"]].map(([f,p])=>`<input style="flex:1 1 180px" placeholder="${p}" value="${esc(draft[f])}" oninput="draft.${f}=this.value">`).join("")+
-  `<select onchange="draft.outcome=this.value">${["pass","fail","inconclusive"].map(o=>`<option ${o===draft.outcome?"selected":""}>${o}</option>`).join("")}</select><input style="flex:1 1 160px" placeholder="Notes" value="${esc(draft.notes)}" oninput="draft.notes=this.value"><button onclick="addTest()">Log test</button></div>`+
-  ttable(st.tests.filter(t=>t.caseId===cur.id),false)+(st.tests.length?`<h2>Full diagnostic history</h2>`+ttable(st.tests,true):"")}
- if(view==="io")h=`<h2>Import / export</h2><p class="m">Paste JSON (entries, an array, {entries:[...]}, cases/tests, or a full export from this app or the Grok Page) and tap Import. Data is stored on this device in IndexedDB; export regularly as a backup.</p><textarea id="io" rows="10" style="width:100%;font-family:monospace"></textarea><div class="row"><button onclick="doImport(document.getElementById('io').value)">Import</button><button onclick="document.getElementById('io').value=JSON.stringify(st,null,2);msg='Copy the JSON above to save it.';document.getElementById('msg').textContent=msg">Export current state</button><button onclick="dl()">Download backup file</button><button onclick="if(confirm('Reset everything to the starter list?'))set(()=>{st=seed();msg='Reset.'})">Reset to starter list</button></div><div id="msg" class="note">${esc(msg)}</div>`;
- A.innerHTML=h}
-function ttable(ts,wc){if(!ts.length)return"";return `<table><tr><th>Date</th>${wc?"<th>Case</th>":""}<th>Culprit</th><th>Test</th><th>Result</th><th>Outcome</th><th>Notes</th></tr>`+[...ts].sort((a,b)=>a.date.localeCompare(b.date)).map(t=>`<tr><td>${t.date}</td>${wc?`<td>${esc((st.cases.find(c=>c.id===t.caseId)||{title:t.caseId}).title)}</td>`:""}<td>${esc(t.culprit)}</td><td>${esc(t.test)}</td><td>${esc(t.result)}</td><td class="${t.outcome}">${t.outcome}</td><td>${esc(t.notes)}</td></tr>`).join("")+`</table>`}
+const toast=m=>{const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),1800)};
+const VIEWS=[["garage","My Garage"],["checklist","Checklist"],["tasks","All Tasks"],["log","Maintenance Log"],["diag","Diagnostics"],["io","Import / Export"],["about","About"]];
+// drawer
+const drawer=document.getElementById("drawer"),scrim=document.getElementById("scrim"),menuBtn=document.getElementById("menuBtn");
+function openDrawer(){drawer.classList.add("open");scrim.classList.add("open");drawer.removeAttribute("inert");drawer.setAttribute("aria-hidden","false");menuBtn.setAttribute("aria-expanded","true");(drawer.querySelector("[aria-current=page]")||drawer.querySelector("button")).focus()}
+function closeDrawer(focus=true){drawer.classList.remove("open");scrim.classList.remove("open");drawer.setAttribute("inert","");drawer.setAttribute("aria-hidden","true");menuBtn.setAttribute("aria-expanded","false");if(focus)menuBtn.focus()}
+menuBtn.onclick=openDrawer;scrim.onclick=()=>closeDrawer();
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&drawer.classList.contains("open"))closeDrawer();
+ if(e.key==="Tab"&&drawer.classList.contains("open")){const f=[...drawer.querySelectorAll("button")];if(!f.length)return;const a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}});
+document.getElementById("vehChip").onclick=()=>go("garage");
+function go(v){G.ui.view=v;editId=null;save();closeDrawer(false);render();window.scrollTo(0,0);document.getElementById("app").focus({preventScroll:true})}
+function navHTML(){return VIEWS.map(([k,l],i)=>(i===VIEWS.length-1?'<li class="sep" role="separator"></li>':"")+`<li><button data-v="${k}" ${G.ui.view===k?'aria-current="page"':""} onclick="go(this.dataset.v)">${l}${k==="garage"?`<span class="count">${G.vehicles.length}</span>`:""}</button></li>`).join("")}
+// checklist ops
+function upd(vid,id,f,v,logIt){set(()=>{const veh=G.vehicles.find(x=>x.id===vid);const it=vItems(veh).find(x=>x.it.id===id).it;it[f]=v;it.updated=today();
+ if(f==="checked"&&v)veh.log.push({date:today(),itemId:id,item:it.label,action:"Completed",part:it.part,cost:parseFloat(it.cost)||0});
+ if(logIt&&v)veh.log.push({date:today(),itemId:id,item:it.label,action:f==="notes"?"Note: "+v:f==="part"?"Part added":"Cost added",part:it.part,cost:f==="cost"?parseFloat(v)||0:0})})}
+function addTask(prefix){const g=k=>document.getElementById(prefix+k);const vid=g("veh").value,label=g("label").value.trim(),err=g("err");
+ if(!vid||!G.vehicles.some(v=>v.id===vid)){err.textContent="Select a vehicle from your garage before saving.";g("veh").focus();return false}
+ if(!label){err.textContent="Enter a task name.";g("label").focus();return false}
+ const veh=G.vehicles.find(v=>v.id===vid),secT=g("sec").value.trim()||"Added tasks",done=g("status").value==="complete",cost=g("cost").value.trim();
+ set(()=>{let s=veh.sections.find(x=>x.title===secT);if(!s){s={title:secT,items:[]};veh.sections.push(s)}const id="t-"+Date.now();
+  s.items.push({id,label,checked:done,notes:"",part:"",cost,updated:today()});veh.log.push({date:today(),itemId:id,item:label,action:done?"Completed (added)":"Task added",part:"",cost:parseFloat(cost)||0})});
+ toast("Task added to "+vName(veh));return true}
+function addLog(){const g=k=>document.getElementById("al"+k);const vid=g("veh").value,item=g("item").value.trim(),err=g("err");
+ if(!vid||!G.vehicles.some(v=>v.id===vid)){err.textContent="Select a vehicle from your garage before saving.";g("veh").focus();return}
+ if(!item){err.textContent="Enter what was done.";g("item").focus();return}
+ const veh=G.vehicles.find(v=>v.id===vid);set(()=>veh.log.push({date:g("date").value||today(),itemId:"",item,action:g("action").value.trim()||"Logged",part:g("part").value.trim(),cost:parseFloat(g("cost").value)||0}));toast("Logged for "+vName(veh))}
+const vehSelect=(id,sel)=>`<select class="input" id="${id}" required><option value="">Select a vehicle…</option>${G.vehicles.map(v=>`<option value="${v.id}" ${v.id===sel?"selected":""}>${esc(vName(v))}</option>`).join("")}</select>`;
+function addTaskForm(prefix,secs){return `<section class="card"><div class="card-h"><h2>Add task</h2><span class="meta">Every task belongs to one vehicle</span></div><div class="card-b"><div class="form">
+ <label class="field full"><span>Vehicle (required)</span>${vehSelect(prefix+"veh",G.activeVehicleId)}</label>
+ <label class="field full"><span>Task</span><input class="input" id="${prefix}label" placeholder="e.g. Replace valve cover gasket"></label>
+ <label class="field"><span>Section</span><input class="input" id="${prefix}sec" list="${prefix}secs" placeholder="Added tasks"><datalist id="${prefix}secs">${secs.map(s=>`<option value="${esc(s)}">`).join("")}</datalist></label>
+ <label class="field"><span>Status</span><select class="input" id="${prefix}status"><option value="open">Open</option><option value="complete">Complete</option></select></label>
+ <label class="field"><span>Cost ($)</span><input class="input" id="${prefix}cost" inputmode="decimal"></label>
+ <div class="field full"><div class="err" id="${prefix}err" role="alert"></div><div class="actions"><button class="btn primary" id="${prefix}save" onclick="addTask('${prefix}')">Save task</button></div></div></div></div></section>`}
+// diagnostics
 const MARKS=["suspect","ruled out","confirmed"];
-function mark(n){set(()=>{const c=st.cases.find(c=>c.id===caseId)||st.cases[0];c.marks=c.marks||{};c.marks[n]=MARKS[(MARKS.indexOf(c.marks[n]||"")+1)%4]||""})}
-function openCase(){if(!query.trim())return;const s=match(query),id="case-"+Date.now();set(()=>{st.cases.push({id,symptomId:s.id,title:query.trim(),opened:today(),notes:s.id==="generic"?"No close match; showing all-systems fishbone.":"Matched: "+s.name,marks:{}});caseId=id})}
-function addTest(){if(!draft.culprit&&!draft.result)return;const c=(st.cases.find(c=>c.id===caseId)||st.cases[0]).id;set(()=>{st.tests.push({...draft,date:today(),caseId:c});draft={culprit:"",test:"",result:"",outcome:"inconclusive",notes:""}})}
-function dl(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(st,null,2)],{type:"application/json"}));a.download="22re-tracker-backup-"+today()+".json";a.click()}
-(async()=>{try{await idb();const s=await load();if(s)st=norm(s);if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){msg="Storage unavailable; use Export."}render()})();
+const curCase=()=>{const v=V();return v.cases.find(c=>c.id===caseId)||v.cases[0]};
+function mark(n){set(()=>{const c=curCase();c.marks=c.marks||{};c.marks[n]=MARKS[(MARKS.indexOf(c.marks[n]||"")+1)%4]||""})}
+function openCase(){if(!query.trim())return;const s=match(query),id="case-"+Date.now();set(()=>{V().cases.push({id,symptomId:s.id,title:query.trim(),opened:today(),notes:s.id==="generic"?"No close match; showing all-systems fishbone.":"Matched: "+s.name,marks:{}});caseId=id;query=""})}
+function addTest(){if(!draft.culprit&&!draft.result)return toast("Add a culprit or result first");const c=curCase();if(!c)return;set(()=>{V().tests.push({...draft,date:today(),caseId:c.id});draft={culprit:"",test:"",result:"",outcome:"inconclusive",notes:""}});toast("Test logged")}
+function ttable(v,ts,wc){if(!ts.length)return"";return `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th>${wc?"<th>Case</th>":""}<th>Culprit / test</th><th>Result</th><th>Outcome</th></tr></thead><tbody>`+[...ts].sort((a,b)=>a.date.localeCompare(b.date)).map(t=>`<tr><td class="num">${t.date}</td>${wc?`<td>${esc((v.cases.find(c=>c.id===t.caseId)||{title:t.caseId}).title)}</td>`:""}<td><b>${esc(t.culprit)}</b><div class="sub">${esc(t.test)}</div></td><td>${esc(t.result)}${t.notes?`<div class="sub">${esc(t.notes)}</div>`:""}</td><td><span class="pill ${t.outcome==="pass"?"ok":t.outcome==="fail"?"bad":""}">${t.outcome}</span></td></tr>`).join("")+`</tbody></table></div>`}
+// vehicles
+function saveVehicle(){const f=k=>document.getElementById("vf"+k).value.trim();const err=document.getElementById("vferr");
+ if(!f("year")||!f("make")||!f("model")){err.textContent="Year, make and model are required.";return}
+ const info={year:f("year"),make:f("make"),model:f("model"),trim:f("trim"),cab:f("cab"),bed:f("bed"),engine:f("engine"),vin:f("vin").toUpperCase(),buildDate:f("buildDate"),buildPlant:f("buildPlant"),mileage:f("mileage"),notes:f("notes")};
+ set(()=>{if(editId&&editId!=="new"){const v=G.vehicles.find(x=>x.id===editId);v.info={...v.info,...info}}else{const id="v"+Date.now();G.vehicles.push({id,is22re:false,info:{...info,symptoms:[]},sections:mkSections(GENERIC_RAW),log:[],cases:[],tests:[]});G.activeVehicleId=id}editId=null});toast("Vehicle saved")}
+function delVehicle(id){if(G.vehicles.length<2)return toast("You can't delete your only vehicle");const v=G.vehicles.find(x=>x.id===id);if(!confirm(`Delete ${vName(v)} and all its records? This can't be undone.`))return;
+ set(()=>{G.vehicles=G.vehicles.filter(x=>x.id!==id);if(G.activeVehicleId===id)G.activeVehicleId=G.vehicles[0].id})}
+function setActive(id){set(()=>{G.activeVehicleId=id;caseId=null});toast("Active: "+vName(V()))}
+// import/export
+function doImport(txt){let d;try{d=JSON.parse(txt)}catch(e){return toast("Could not read that JSON")}
+ if(d.vehicles){if(!confirm("Replace your whole garage with this backup?"))return;set(()=>{const ui=G.ui;G=migrate(d);G.ui=ui;if(!G.vehicles.some(v=>v.id===G.activeVehicleId))G.activeVehicleId=G.vehicles[0].id});return toast("Garage restored")}
+ const veh=d.vehicleId&&G.vehicles.find(v=>v.id===d.vehicleId)||V();
+ const arr=Array.isArray(d)?d:Array.isArray(d.entries)?d.entries:(d.sections||d.cases||d.tests)?[]:[d];
+ set(()=>{if(d.sections&&d.log){veh.sections=d.sections;veh.log=d.log;veh.cases=d.cases&&d.cases.length?d.cases:veh.cases;veh.tests=d.tests||[];if(d.info)veh.info={...veh.info,...d.info}}else{
+  if(d.sections)veh.sections=d.sections.map(s=>({title:s.title,items:s.items.map(it=>({id:it.id,label:it.label,checked:!!it.checked,notes:it.notes||"",part:it.part||"",cost:it.cost?String(it.cost):"",updated:""}))}));
+  if(Array.isArray(d.cases))d.cases.forEach(c=>{if(!veh.cases.some(x=>x.id===c.id))veh.cases.push({marks:{},...c})});
+  if(Array.isArray(d.tests))veh.tests.push(...d.tests);}
+  arr.forEach(e=>{const tv=e.vehicleId&&G.vehicles.find(v=>v.id===e.vehicleId)||veh;const id=e.itemId||e.id||"";const f=vItems(tv).find(x=>x.it.id===id);const it=f&&f.it;
+   if(!it&&e.label){const t=e.section||"Added from conversation";let s=tv.sections.find(x=>x.title===t);if(!s){s={title:t,items:[]};tv.sections.push(s)}s.items.push({id:id||"x-"+Date.now()+"-"+tv.log.length,label:e.label,checked:!!e.checked,notes:e.notes||"",part:e.part||"",cost:e.cost?String(e.cost):"",updated:e.date||today()})}
+   else if(it){if(e.checked!=null)it.checked=e.checked;if(e.notes!=null)it.notes=e.notes;if(e.part!=null)it.part=e.part;if(e.cost!=null)it.cost=String(e.cost);it.updated=e.date||today()}
+   tv.log.push({date:e.date||today(),itemId:id,item:e.label||e.item||id,action:e.action||(e.checked?"Completed":"Imported"),part:e.part||"",cost:parseFloat(e.cost)||0})})});
+ toast("Imported into "+vName(veh))}
+const exportVehicle=()=>{const v=V();return {vehicleId:v.id,info:v.info,sections:v.sections,log:v.log,cases:v.cases,tests:v.tests}};
+const exportGarage=()=>({version:2,activeVehicleId:G.activeVehicleId,vehicles:G.vehicles});
+function dl(obj,name){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:"application/json"}));a.download=name;a.click()}
+function setIO(obj){const t=document.getElementById("io");t.value=JSON.stringify(obj,null,2);t.focus();t.select();toast("Copied into the box below")}
+// views
+function viewGarage(){const cards=G.vehicles.map(v=>{const it=vItems(v),d=it.filter(x=>x.it.checked).length,act=v.id===G.activeVehicleId,i=v.info;
+ const kv=[["VIN",i.vin?`<span class="mono">${esc(i.vin)}</span>`:""],["Built",[i.buildDate,i.buildPlant].filter(Boolean).map(esc).join(", ")],["Body",[i.trim,i.cab,i.bed].filter(Boolean).map(esc).join(", ")],["Mileage",i.mileage?esc(i.mileage)+" mi":""],["Notes",esc(i.notes)]].filter(x=>x[1]);
+ return `<article class="card veh ${act?"active":""}" data-vid="${v.id}"><div class="card-b"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><h3>${esc(vName(v))}</h3><div class="eng">${esc(i.engine||"Engine not set")}</div></div>${act?'<span class="pill acc">Active</span>':""}</div>
+ <dl class="kv">${kv.map(([k,x])=>`<dt>${k}</dt><dd>${x}</dd>`).join("")}</dl>
+ ${i.symptoms&&i.symptoms.length?`<div class="sub" style="margin-bottom:12px">Symptoms: ${i.symptoms.map(esc).join("; ")}</div>`:""}
+ <div class="mini"><div><b>${d} / ${it.length}</b><span>Items done</span></div><div><b>${openCases(v)}</b><span>Open cases</span></div><div><b>${money(vSpent(v))}</b><span>Spent</span></div></div>
+ <div class="actions">${act?`<button class="btn sm primary" onclick="go('checklist')">Open checklist</button>`:`<button class="btn sm primary" onclick="setActive('${v.id}')">Set active</button>`}<button class="btn sm" onclick="editId='${v.id}';render()">Edit</button><button class="btn sm danger" onclick="delVehicle('${v.id}')" ${G.vehicles.length<2?"disabled title=\"Can't delete your only vehicle\"":""}>Delete</button></div></div></article>`}).join("");
+ return `<div class="page-h"><p>${G.vehicles.length} vehicle${G.vehicles.length>1?"s":""}. The active vehicle is used by Checklist, Log and Diagnostics.</p></div>${editId?vehicleForm():`<div class="actions" style="margin-bottom:16px"><button class="btn primary" id="addVeh" onclick="editId='new';render()">Add vehicle</button></div>`}<div class="garage">${cards}</div>`}
+function vehicleForm(){const i=editId==="new"?{}:(G.vehicles.find(v=>v.id===editId)||{info:{}}).info;const F=(k,l,full,ph)=>`<label class="field ${full?"full":""}"><span>${l}</span><input class="input" id="vf${k}" value="${esc(i[k]||"")}" placeholder="${ph||""}"${k==="year"||k==="mileage"?' inputmode="numeric"':""}></label>`;
+ return `<section class="card"><div class="card-h"><h2>${editId==="new"?"Add vehicle":"Edit vehicle"}</h2></div><div class="card-b"><div class="form">${F("year","Year *")}${F("make","Make *")}${F("model","Model *")}${F("trim","Trim")}${F("cab","Cab")}${F("bed","Bed")}${F("engine","Engine",true)}${F("vin","VIN",true)}${F("buildDate","Build date")}${F("buildPlant","Build plant")}${F("mileage","Mileage")}${F("notes","Notes",true)}
+ <div class="field full"><div class="err" id="vferr" role="alert"></div><div class="actions"><button class="btn primary" id="vfsave" onclick="saveVehicle()">Save vehicle</button><button class="btn" onclick="editId=null;render()">Cancel</button></div></div></div></div></section>`}
+function viewChecklist(){const v=V(),it=vItems(v),d=it.filter(x=>x.it.checked).length;
+ return `<div class="stats"><div class="stat"><b>${d}/${it.length}</b><span>Done</span></div><div class="stat"><b>${v.log.length}</b><span>Log entries</span></div><div class="stat"><b>${money(vSpent(v))}</b><span>Spent</span></div></div>`+
+ v.sections.map(s=>{const sd=s.items.filter(x=>x.checked).length;return `<section class="card"><div class="card-h"><h2>${esc(s.title)}</h2><span class="meta">${sd}/${s.items.length}</span></div><div class="card-b flush">`+s.items.map(it=>`<div class="item ${it.checked?"done":""}" id="item-${it.id}"><div class="item-top"><input type="checkbox" class="check" aria-label="${esc(it.label)}" data-id="${it.id}" ${it.checked?"checked":""} onchange="upd('${v.id}',this.dataset.id,'checked',this.checked)"><label class="item-label">${esc(it.label)}${it.updated?`<div class="sub">Updated ${it.updated}</div>`:""}</label></div>
+ <div class="item-fields">${[["notes","Notes"],["part","Part #"],["cost","Cost $"]].map(([f,p])=>`<input class="input ${f}" aria-label="${p}" placeholder="${p}" value="${esc(it[f])}" data-id="${it.id}" ${f==="cost"?'inputmode="decimal"':""} onchange="upd('${v.id}',this.dataset.id,'${f}',this.value,true)">`).join("")}</div></div>`).join("")+`</div></section>`}).join("")+addTaskForm("ct",v.sections.map(s=>s.title))}
+function taskRows(){const fv=G.ui.filterVeh,fs=G.ui.filterStatus;const rows=[];G.vehicles.forEach(v=>{if(fv!=="all"&&fv!==v.id)return;v.sections.forEach(s=>s.items.forEach(it=>{if(fs==="open"&&it.checked)return;if(fs==="complete"&&!it.checked)return;
+ const last=[...v.log].reverse().find(l=>l.itemId===it.id);rows.push({v,s,it,last:it.updated||(last&&last.date)||""})}))});return rows}
+function viewTasks(){const rows=taskRows();
+ return `<section class="card"><div class="card-h"><h2>Filters</h2><span class="meta" id="taskCount">${rows.length} task${rows.length===1?"":"s"}</span></div><div class="card-b"><div class="filters">
+ <label class="field"><span>Vehicle</span><select class="input" id="fVeh" onchange="set(()=>G.ui.filterVeh=this.value)"><option value="all">All vehicles</option>${G.vehicles.map(v=>`<option value="${v.id}" ${G.ui.filterVeh===v.id?"selected":""}>${esc(vName(v))}</option>`).join("")}</select></label>
+ <label class="field"><span>Status</span><select class="input" id="fStatus" onchange="set(()=>G.ui.filterStatus=this.value)">${[["all","All"],["open","Open"],["complete","Complete"]].map(([k,l])=>`<option value="${k}" ${G.ui.filterStatus===k?"selected":""}>${l}</option>`).join("")}</select></label></div></div></section>
+ <section class="card"><div class="card-h"><h2>All tasks</h2><span class="meta">Across your garage</span></div><div class="card-b flush">`+(rows.length?rows.map(r=>`<div class="list-row task-row"><input type="checkbox" class="check" aria-label="${esc(r.it.label)}" ${r.it.checked?"checked":""} onchange="upd('${r.v.id}','${r.it.id}','checked',this.checked)"><div class="grow"><button class="linkish" onclick="openItem('${r.v.id}','${r.it.id}')">${esc(r.it.label)}</button><div class="sub">${esc(vName(r.v))} · ${esc(r.s.title)}${r.last?" · "+r.last:""}</div></div><div style="text-align:right"><span class="pill ${r.it.checked?"ok":""}">${r.it.checked?"Complete":"Open"}</span>${r.it.cost?`<div class="sub num" style="margin-top:4px">${money(parseFloat(r.it.cost)||0)}</div>`:""}</div></div>`).join(""):`<div class="card-b sub">No tasks match these filters.</div>`)+`</div></section>`+addTaskForm("at",[...new Set(G.vehicles.flatMap(v=>v.sections.map(s=>s.title)))])}
+function openItem(vid,id){G.activeVehicleId=vid;go("checklist");const el=document.getElementById("item-"+id);if(el){el.scrollIntoView({block:"center"});const i=el.querySelector("input.notes");i&&i.focus({preventScroll:true})}}
+function viewLog(){const v=V();let r=0;const rows=[...v.log].sort((a,b)=>a.date.localeCompare(b.date));
+ return `<div class="stats"><div class="stat"><b>${v.log.length}</b><span>Entries</span></div><div class="stat"><b>${money(vSpent(v))}</b><span>Total spent</span></div><div class="stat"><b>${rows.length?rows[rows.length-1].date.slice(5):"—"}</b><span>Last entry</span></div></div>
+ <section class="card"><div class="card-h"><h2>History</h2><span class="meta">${esc(vName(v))}</span></div><div class="card-b flush">`+(rows.length?`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Item</th><th class="num">Cost</th><th class="num">Running</th></tr></thead><tbody>`+rows.map(l=>{r+=l.cost||0;return `<tr><td class="num">${l.date}</td><td><b>${esc(l.item)}</b><div class="sub">${esc(l.action)}${l.part?" · Part "+esc(l.part):""}</div></td><td class="num">${l.cost?money(l.cost):""}</td><td class="num">${money(r)}</td></tr>`}).join("")+`</tbody></table></div>`:`<div class="card-b sub">Entries appear when you check an item, add a note, part or cost, or log work below.</div>`)+`</div></section>
+ <section class="card"><div class="card-h"><h2>Add log entry</h2></div><div class="card-b"><div class="form">
+ <label class="field full"><span>Vehicle (required)</span>${vehSelect("alveh",v.id)}</label>
+ <label class="field"><span>Date</span><input class="input" type="date" id="aldate" value="${today()}"></label>
+ <label class="field"><span>Cost ($)</span><input class="input" id="alcost" inputmode="decimal"></label>
+ <label class="field full"><span>Item / work done</span><input class="input" id="alitem" placeholder="e.g. Oil and filter change"></label>
+ <label class="field"><span>Action</span><input class="input" id="alaction" placeholder="Completed"></label>
+ <label class="field"><span>Part #</span><input class="input" id="alpart"></label>
+ <div class="field full"><div class="err" id="alerr" role="alert"></div><div class="actions"><button class="btn primary" onclick="addLog()">Save entry</button></div></div></div></div></section>`}
+function viewDiag(){const v=V(),cur=curCase();
+ const picker=`<section class="card"><div class="card-h"><h2>Cases</h2><span class="meta">${v.cases.length}</span></div><div class="card-b"><div class="form">
+ ${v.cases.length?`<label class="field full"><span>Current case</span><select class="input" onchange="caseId=this.value;render()">${v.cases.map(c=>`<option value="${c.id}" ${cur&&c.id===cur.id?"selected":""}>${c.opened} · ${esc(c.title)}</option>`).join("")}</select></label>`:""}
+ <label class="field full"><span>New case: pick a symptom</span><select class="input" onchange="query=symById(this.value).name;render()"><option value="">Choose…</option>${LIB.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select></label>
+ <label class="field full"><span>…or describe it</span><input class="input" id="q" placeholder="e.g. dies when hot" value="${esc(query)}" oninput="query=this.value" onkeydown="if(event.key==='Enter')openCase()"></label>
+ <div class="field full"><div class="actions"><button class="btn primary" onclick="openCase()">Open new case</button></div></div></div>
+ ${v.is22re&&/\biac\b|idle air control/i.test(query+" "+(cur?cur.title:""))?`<div class="note">${IAC_NOTE}</div>`:""}</div></section>`;
+ if(!cur)return picker;const sym=symById(cur.symptomId),ts=v.tests.filter(t=>t.caseId===cur.id);
+ return picker+`<section class="card"><div class="card-h"><h2>Root cause map</h2><span class="meta">${esc(sym.name)}</span></div><div class="card-b">
+ <div class="head"><span>Symptom · opened ${cur.opened}</span>${esc(cur.title)}<div class="sub" style="font-weight:400;margin-top:4px">${esc(cur.notes)}</div></div>
+ <p class="sub" style="margin:8px 0 12px">Tap a culprit to prefill a test. Tap its tag to cycle suspect, ruled out, confirmed. Specs marked "verify" must be checked against the service manual or underhood label.</p>
+ <div class="fb">`+sym.branches.map(([sys,cs])=>`<div class="branch"><h4>${esc(v.is22re?sys:sys.replace(" (no electronic IAC on 22RE)",""))}</h4>`+cs.map(([n,t])=>{const m=(cur.marks||{})[n]||"",cl=m==="ruled out"?"ruled":m;return `<div class="culprit ${cl}"><div class="culprit-top"><button class="linkish" data-n="${esc(n)}" data-t="${esc(t)}" onclick="draft.culprit=this.dataset.n;draft.test=this.dataset.t;render();document.getElementById('dResult').focus()">${esc(n)}</button><button class="tag ${cl}" data-n="${esc(n)}" onclick="mark(this.dataset.n)">${m||"untested"}</button></div><div class="sub">${esc(t)}</div></div>`}).join("")+`</div>`).join("")+`</div></div></section>
+ <section class="card"><div class="card-h"><h2>What I tested</h2><span class="meta">${ts.length}</span></div><div class="card-b"><div class="form">
+ <label class="field"><span>Culprit</span><input class="input" value="${esc(draft.culprit)}" oninput="draft.culprit=this.value"></label>
+ <label class="field"><span>Outcome</span><select class="input" onchange="draft.outcome=this.value">${["pass","fail","inconclusive"].map(o=>`<option ${o===draft.outcome?"selected":""}>${o}</option>`).join("")}</select></label>
+ <label class="field full"><span>Test done</span><input class="input" value="${esc(draft.test)}" oninput="draft.test=this.value"></label>
+ <label class="field full"><span>Result / finding</span><input class="input" id="dResult" value="${esc(draft.result)}" oninput="draft.result=this.value"></label>
+ <label class="field full"><span>Notes</span><input class="input" value="${esc(draft.notes)}" oninput="draft.notes=this.value"></label>
+ <div class="field full"><div class="actions"><button class="btn primary" onclick="addTest()">Log test</button></div></div></div></div>${ts.length?`<div style="border-top:1px solid var(--border)">${ttable(v,ts,false)}</div>`:""}</section>`+
+ (v.tests.length?`<section class="card"><div class="card-h"><h2>Diagnostic history</h2><span class="meta">${esc(vName(v))}</span></div>${ttable(v,v.tests,true)}</section>`:"")}
+function viewIO(){return `<section class="card"><div class="card-h"><h2>Export</h2></div><div class="card-b"><p class="sub" style="margin-top:0">Data lives on this device. Export regularly as a backup.</p><div class="actions">
+ <button class="btn" onclick="setIO(exportVehicle())">Show active vehicle JSON</button><button class="btn" onclick="setIO(exportGarage())">Show garage JSON</button>
+ <button class="btn primary" onclick="dl(exportGarage(),'garage-backup-'+today()+'.json')">Download garage backup</button><button class="btn" onclick="dl(exportVehicle(),'vehicle-'+V().id+'-'+today()+'.json')">Download active vehicle</button></div></div></section>
+ <section class="card"><div class="card-h"><h2>Import</h2><span class="meta">Into ${esc(vName(V()))}</span></div><div class="card-b"><p class="sub" style="margin-top:0">Paste a garage backup (replaces the garage), a single-vehicle or old single-truck export, or entries from the assistant. Entries without a vehicleId go to the active vehicle.</p>
+ <textarea class="input" id="io" rows="8" style="font-family:var(--mono);font-size:13px">${esc(ioText)}</textarea><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="doImport(document.getElementById('io').value)">Import</button></div></div></section>
+ <section class="card"><div class="card-h"><h2>Reset</h2></div><div class="card-b"><p class="sub" style="margin-top:0">Resets the active vehicle's checklist, log and diagnostics to its starter template.</p><button class="btn danger" onclick="if(confirm('Reset '+vName(V())+' to its starter list?'))set(()=>{const v=V();v.sections=mkSections(v.is22re?RAW:GENERIC_RAW);v.log=[];v.tests=[];v.cases=v.is22re?[{...SEED_CASE,marks:{}}]:[]})">Reset active vehicle</button></div></section>`}
+function viewAbout(){return `<section class="card"><div class="card-h"><h2>About</h2></div><div class="card-b"><p style="margin-top:0">Garage Tracker keeps checklists, a dated maintenance log and diagnostic cases per vehicle. It works offline and stores data on this device only.</p><p class="sub">Specs marked "verify" should be checked against the factory service manual or underhood emissions label. Build garage-v2.</p></div></section>`}
+function render(){const v=V(),t=(VIEWS.find(x=>x[0]===G.ui.view)||VIEWS[0]);if(!VIEWS.some(x=>x[0]===G.ui.view))G.ui.view="garage";
+ document.getElementById("viewTitle").textContent=t[1];document.getElementById("vehChip").textContent=vName(v);document.title=t[1]+" · Garage Tracker";
+ document.getElementById("nav").innerHTML=navHTML();
+ const f={garage:viewGarage,checklist:viewChecklist,tasks:viewTasks,log:viewLog,diag:viewDiag,io:viewIO,about:viewAbout}[t[0]];document.getElementById("app").innerHTML=f()}
+(async()=>{try{await idb();let s=await load();if(!s){try{const ls=localStorage.getItem("toyota22re-tracker-v1");if(ls)s=JSON.parse(ls)}catch(e){}}G=migrate(s);save();if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){toast("Storage unavailable; use Export")}render()})();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script></body></html>
