@@ -5,7 +5,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Garage">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#111214" media="(prefers-color-scheme: dark)">
-<meta name="app-build" content="garage-v4">
+<meta name="app-build" content="garage-v5">
 <style>
 :root{--bg:#f6f7f9;--surface:#fff;--sunken:#f0f2f5;--text:#16181d;--text2:#555b66;--text3:#868c97;--border:#e3e6eb;--border2:#cfd4dc;--accent:#1d5fd1;--accent-ink:#fff;--accent-soft:#e8effc;--ok:#1f7a4d;--warn:#a86400;--bad:#b42318;
 --s1:8px;--s2:16px;--s3:24px;--s4:32px;--r:10px;--shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.04);
@@ -81,6 +81,9 @@ main{max-width:880px;margin:0 auto;padding:var(--s2) calc(var(--s2) + env(safe-a
 .head{border:1px solid var(--accent);background:var(--accent-soft);border-radius:var(--r);padding:12px;margin-bottom:var(--s1);font-weight:600}
 .head span{display:block;font-size:12px;font-weight:500;color:var(--accent)}
 .note{background:var(--accent-soft);border-radius:8px;padding:10px 12px;font-size:14px;margin-top:12px}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:35;background:var(--surface);border-top:1px solid var(--border2);box-shadow:0 -4px 16px rgba(16,24,40,.12);padding:var(--s2) calc(var(--s2) + env(safe-area-inset-right)) calc(var(--s2) + env(safe-area-inset-bottom)) calc(var(--s2) + env(safe-area-inset-left));max-height:50vh;overflow:auto}
+.sheet h3{margin:0 0 8px;font-size:15px}.note-item{padding:10px 12px;border-top:1px solid var(--border)}.note-item:first-child{border-top:0}.note-text{white-space:pre-wrap}
+.offer{margin-top:8px;border:1px solid var(--accent);background:var(--accent-soft);border-radius:var(--r);padding:12px}
 .toast{position:fixed;left:50%;bottom:calc(var(--s3) + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px var(--s2);border-radius:8px;font-size:14px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none}.toast.show{opacity:1}
 .filters{display:grid;grid-template-columns:1fr 1fr;gap:var(--s1)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -96,7 +99,7 @@ main{max-width:880px;margin:0 auto;padding:var(--s2) calc(var(--s2) + env(safe-a
  <ul class="nav" id="nav"></ul>
 </nav>
 <main id="app" tabindex="-1"></main>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="sheet" id="sheet" hidden role="region" aria-label="Specs for this item"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const RAW=[
 ["Known symptoms (starter items)",["Rough idle: monitor, improving on its own as of 2026-10-31","Stumble at wide-open throttle: diagnose (see idle/throttle section)","No check engine light: confirm bulb lights at key-on, check for stored codes","Oscillation when braking: re-check after front rotor replacement and tire balance"]],
@@ -174,8 +177,8 @@ const q5=()=>({id:"v2",is22re:false,info:{...Q5_INFO},sections:mkSections(Q5_RAW
 const TRUCK_INFO={year:"1993",make:"Toyota",model:"Pickup",trim:"",cab:"Regular cab",bed:"Long bed",engine:"22RE 2.4L SOHC EFI (timing chain)",vin:"4TARN01P5PZ081471",buildDate:"Sept 1993",buildPlant:"Fremont, CA",mileage:"",notes:"Likely 2WD per VIN, verify.",
  symptoms:["Rough idle (improving on its own as of 2026-10-31)","Stumble at wide-open throttle","No check engine light","Oscillation when braking"]};
 const truck=(old)=>({id:"v1",is22re:true,info:{...TRUCK_INFO},sections:old&&old.sections?old.sections:mkSections(RAW),log:old&&old.log||[],cases:old&&old.cases&&old.cases.length?old.cases:[{...SEED_CASE,marks:{}}],tests:old&&old.tests||[],parts:TRUCK_PARTS()});
-const newGarage=()=>({version:2,activeVehicleId:"v1",vehicles:[truck(),q5()],seeded:{q5:true},ui:{view:"garage",filterVeh:"all",filterStatus:"all"}});
-const migrate=s=>{if(!s)return newGarage();if(s.vehicles&&s.vehicles.length){s.ui=Object.assign({view:"garage",filterVeh:"all",filterStatus:"all"},s.ui||{});if(!s.vehicles.some(v=>v.id===s.activeVehicleId))s.activeVehicleId=s.vehicles[0].id;s.vehicles.forEach(v=>{v.log=v.log||[];v.cases=v.cases||[];v.tests=v.tests||[];if(!v.parts)v.parts=v.is22re?TRUCK_PARTS():[]});s.seeded=s.seeded||{};if(!s.seeded.q5){if(!s.vehicles.some(v=>v.info.make==="Audi"&&v.info.model==="Q5"))s.vehicles.push(q5());s.seeded.q5=true}return s}
+const newGarage=()=>({version:3,specs:[],activeVehicleId:"v1",vehicles:[truck(),q5()],seeded:{q5:true},ui:{view:"garage",filterVeh:"all",filterStatus:"all"}});
+const migrate=s=>{if(!s)return newGarage();if(s.vehicles&&s.vehicles.length){s.specs=Array.isArray(s.specs)?s.specs:[];s.ui=Object.assign({view:"garage",filterVeh:"all",filterStatus:"all"},s.ui||{});if(!s.vehicles.some(v=>v.id===s.activeVehicleId))s.activeVehicleId=s.vehicles[0].id;s.vehicles.forEach(v=>{v.log=v.log||[];v.cases=v.cases||[];v.tests=v.tests||[];if(!v.parts)v.parts=v.is22re?TRUCK_PARTS():[]});s.seeded=s.seeded||{};if(!s.seeded.q5){if(!s.vehicles.some(v=>v.info.make==="Audi"&&v.info.model==="Q5"))s.vehicles.push(q5());s.seeded.q5=true}return s}
  if(s.sections){const g=newGarage();g.vehicles[0]=truck(s);return g}return newGarage()};
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -191,7 +194,7 @@ const vSpent=v=>v.log.reduce((a,l)=>a+(l.cost||0),0);
 const openCases=v=>v.cases.filter(c=>!Object.values(c.marks||{}).includes("confirmed")).length;
 const set=fn=>{fn();save();render()};
 const toast=m=>{const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),1800)};
-const VIEWS=[["garage","My Garage"],["checklist","Checklist"],["tasks","All Tasks"],["log","Maintenance Log"],["diag","Diagnostics"],["parts","Parts"],["io","Import / Export"],["about","About"]];
+const VIEWS=[["garage","My Garage"],["checklist","Checklist"],["tasks","All Tasks"],["log","Maintenance Log"],["diag","Diagnostics"],["parts","Parts"],["specs","Specs"],["io","Import / Export"],["about","About"]];
 // drawer
 const drawer=document.getElementById("drawer"),scrim=document.getElementById("scrim"),menuBtn=document.getElementById("menuBtn");
 function openDrawer(){drawer.classList.add("open");scrim.classList.add("open");drawer.removeAttribute("inert");drawer.setAttribute("aria-hidden","false");menuBtn.setAttribute("aria-expanded","true");(drawer.querySelector("[aria-current=page]")||drawer.querySelector("button")).focus()}
@@ -249,6 +252,8 @@ function setActive(id){set(()=>{G.activeVehicleId=id;caseId=null});toast("Active
 function doImport(txt){let d;try{d=JSON.parse(txt)}catch(e){return toast("Could not read that JSON")}
  if(d.vehicles){if(!confirm("Replace your whole garage with this backup?"))return;set(()=>{const ui=G.ui;G=migrate(d);G.ui=ui;if(!G.vehicles.some(v=>v.id===G.activeVehicleId))G.activeVehicleId=G.vehicles[0].id});return toast("Garage restored")}
  const veh=d.vehicleId&&G.vehicles.find(v=>v.id===d.vehicleId)||V();
+ if(Array.isArray(d.specs)){G.specs=G.specs||[];d.specs.forEach(x=>{if(!G.specs.some(y=>y.id===x.id))G.specs.push({...x,vehicleId:veh.id,taskIds:x.taskIds||[]})})}
+ if(Array.isArray(d.parts)&&d.sections&&d.log)veh.parts=d.parts;
  const arr=Array.isArray(d)?d:Array.isArray(d.entries)?d.entries:(d.sections||d.cases||d.tests)?[]:[d];
  set(()=>{if(d.sections&&d.log){veh.sections=d.sections;veh.log=d.log;veh.cases=d.cases&&d.cases.length?d.cases:veh.cases;veh.tests=d.tests||[];if(d.info)veh.info={...veh.info,...d.info}}else{
   if(d.sections)veh.sections=d.sections.map(s=>({title:s.title,items:s.items.map(it=>({id:it.id,label:it.label,checked:!!it.checked,notes:it.notes||"",part:it.part||"",cost:it.cost?String(it.cost):"",updated:""}))}));
@@ -259,8 +264,8 @@ function doImport(txt){let d;try{d=JSON.parse(txt)}catch(e){return toast("Could 
    else if(it){if(e.checked!=null)it.checked=e.checked;if(e.notes!=null)it.notes=e.notes;if(e.part!=null)it.part=e.part;if(e.cost!=null)it.cost=String(e.cost);it.updated=e.date||today()}
    tv.log.push({date:e.date||today(),itemId:id,item:e.label||e.item||id,action:e.action||(e.checked?"Completed":"Imported"),part:e.part||"",cost:parseFloat(e.cost)||0})})});
  toast("Imported into "+vName(veh))}
-const exportVehicle=()=>{const v=V();return {vehicleId:v.id,info:v.info,sections:v.sections,log:v.log,cases:v.cases,tests:v.tests}};
-const exportGarage=()=>({version:2,activeVehicleId:G.activeVehicleId,vehicles:G.vehicles});
+const exportVehicle=()=>{const v=V();return {version:3,vehicleId:v.id,info:v.info,sections:v.sections,log:v.log,cases:v.cases,tests:v.tests,parts:v.parts||[],mileageLog:v.mileageLog||[],specs:(G.specs||[]).filter(x=>x.vehicleId===v.id)}};
+const exportGarage=()=>({version:3,activeVehicleId:G.activeVehicleId,vehicles:G.vehicles,specs:G.specs||[]});
 function dl(obj,name){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:"application/json"}));a.download=name;a.click()}
 function setIO(obj){const t=document.getElementById("io");t.value=JSON.stringify(obj,null,2);t.focus();t.select();toast("Copied into the box below")}
 // views
@@ -278,7 +283,7 @@ function vehicleForm(){const i=editId==="new"?{}:(G.vehicles.find(v=>v.id===edit
 function viewChecklist(){const v=V(),it=vItems(v),d=it.filter(x=>x.it.checked).length;
  return `<div class="stats"><div class="stat"><b>${d}/${it.length}</b><span>Done</span></div><div class="stat"><b>${v.log.length}</b><span>Log entries</span></div><div class="stat"><b>${money(vSpent(v))}</b><span>Spent</span></div></div>`+
  v.sections.map(s=>{const sd=s.items.filter(x=>x.checked).length;return `<section class="card"><div class="card-h"><h2>${esc(s.title)}</h2><span class="meta">${sd}/${s.items.length}</span></div><div class="card-b flush">`+s.items.map(it=>`<div class="item ${it.checked?"done":""}" id="item-${it.id}"><div class="item-top"><input type="checkbox" class="check" aria-label="${esc(it.label)}" data-id="${it.id}" ${it.checked?"checked":""} onchange="upd('${v.id}',this.dataset.id,'checked',this.checked)"><label class="item-label">${esc(it.label)}${it.dueMiles||it.dueDate?`<div class="sub">Due ${[it.dueMiles?Number(it.dueMiles).toLocaleString()+" mi":"",it.dueDate].filter(Boolean).join(" or ")}</div>`:""}${it.updated?`<div class="sub">Updated ${it.updated}</div>`:""}</label></div>
- <div style="padding-left:36px;margin-top:6px"><button class="btn sm danger" data-del="${it.id}" onclick="delTask('${v.id}','${it.id}')">Delete task</button></div>${partsPanel(v,it)}<div class="item-fields">${[["notes","Notes"],["part","Part #"],["cost","Cost $"]].map(([f,p])=>`<input class="input ${f}" aria-label="${p}" placeholder="${p}" value="${esc(it[f])}" data-id="${it.id}" ${f==="cost"?'inputmode="decimal"':""} onchange="upd('${v.id}',this.dataset.id,'${f}',this.value,true)">`).join("")}</div></div>`).join("")+`</div></section>`}).join("")+addTaskForm("ct",v.sections.map(s=>s.title))}
+ ${notesPanel(v,it)}<div style="padding-left:36px;margin-top:6px"><button class="btn sm danger" data-del="${it.id}" onclick="delTask('${v.id}','${it.id}')">Delete task</button></div>${partsPanel(v,it)}<div class="item-fields">${[["notes","Notes"],["part","Part #"],["cost","Cost $"]].map(([f,p])=>`<input class="input ${f}" aria-label="${p}" placeholder="${p}" value="${esc(it[f])}" data-id="${it.id}" ${f==="cost"?'inputmode="decimal"':""} onchange="upd('${v.id}',this.dataset.id,'${f}',this.value,true)">`).join("")}</div></div>`).join("")+`</div></section>`}).join("")+addTaskForm("ct",v.sections.map(s=>s.title))}
 function taskRows(){const fv=G.ui.filterVeh,fs=G.ui.filterStatus;const rows=[];G.vehicles.forEach(v=>{if(fv!=="all"&&fv!==v.id)return;v.sections.forEach(s=>s.items.forEach(it=>{if(fs==="open"&&it.checked)return;if(fs==="complete"&&!it.checked)return;
  const last=[...v.log].reverse().find(l=>l.itemId===it.id);rows.push({v,s,it,last:it.updated||(last&&last.date)||""})}))});return rows}
 function viewTasks(){const rows=taskRows();
@@ -324,11 +329,82 @@ function viewIO(){return `<section class="card"><div class="card-h"><h2>Export</
  <section class="card"><div class="card-h"><h2>Import</h2><span class="meta">Into ${esc(vName(V()))}</span></div><div class="card-b"><p class="sub" style="margin-top:0">Paste a garage backup (replaces the garage), a single-vehicle or old single-truck export, or entries from the assistant. Entries without a vehicleId go to the active vehicle.</p>
  <textarea class="input" id="io" rows="8" style="font-family:var(--mono);font-size:13px">${esc(ioText)}</textarea><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="doImport(document.getElementById('io').value)">Import</button></div></div></section>
  <section class="card"><div class="card-h"><h2>Reset</h2></div><div class="card-b"><p class="sub" style="margin-top:0">Resets the active vehicle's checklist, log and diagnostics to its starter template.</p><button class="btn danger" onclick="if(confirm('Reset '+vName(V())+' to its starter list?'))set(()=>{const v=V();v.sections=mkSections(v.is22re?RAW:GENERIC_RAW);v.log=[];v.tests=[];v.cases=v.is22re?[{...SEED_CASE,marks:{}}]:[]})">Reset active vehicle</button></div></section>`}
-function viewAbout(){return `<section class="card"><div class="card-h"><h2>About</h2></div><div class="card-b"><p style="margin-top:0">Garage Tracker keeps checklists, a dated maintenance log and diagnostic cases per vehicle. It works offline and stores data on this device only.</p><p class="sub">Specs marked "verify" should be checked against the factory service manual or underhood emissions label. Build garage-v4.</p></div></section>`}
+function viewAbout(){return `<section class="card"><div class="card-h"><h2>About</h2></div><div class="card-b"><p style="margin-top:0">Garage Tracker keeps checklists, a dated maintenance log and diagnostic cases per vehicle. It works offline and stores data on this device only.</p><p class="sub">Specs marked "verify" should be checked against the factory service manual or underhood emissions label. Build garage-v5.</p></div></section>`}
+
+// ---------- Notes ----------
+const openNotes={},noteDraft={};let noteEditing=null,offer=null;
+const nid=()=>Math.random().toString(36).slice(2,10);
+const findItem=(vid,id)=>{const v=G.vehicles.find(x=>x.id===vid);const f=v&&vItems(v).find(x=>x.it.id===id);return f&&f.it};
+const fmtD=iso=>{try{const d=new Date(iso);return d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"})+" "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})}catch(e){return iso}};
+function notesPanel(v,it){const k=v.id+"|"+it.id,ns=it.noteLog||[],open=openNotes[k];
+ let h=`<div style="padding-left:36px;margin-top:6px"><button class="btn sm" data-notes="${it.id}" aria-expanded="${!!open}" onclick="toggleNotes('${v.id}','${it.id}')">Notes${ns.length?" ("+ns.length+")":""}</button>`;
+ if(open){h+=`<div class="branch notes-panel" style="margin-top:8px">`+ns.map(n=>noteEditing===n.id?`<div class="note-item"><textarea class="input" id="ne-${n.id}" rows="3">${esc(n.text)}</textarea><div class="actions" style="margin-top:6px"><button class="btn sm primary" onclick="saveNoteEdit('${v.id}','${it.id}','${n.id}')">Save</button><button class="btn sm" onclick="noteEditing=null;render()">Cancel</button></div></div>`:
+  `<div class="note-item" data-note="${n.id}"><div class="sub">Posted ${fmtD(n.postedAt)}${n.editedAt?" · edited "+fmtD(n.editedAt):""}</div><div class="note-text">${esc(n.text)}</div><div class="actions" style="margin-top:6px"><button class="btn sm" onclick="noteEditing='${n.id}';render()">Edit</button><button class="btn sm danger" onclick="delNote('${v.id}','${it.id}','${n.id}')">Delete</button></div></div>`).join("")+
+  `<div class="note-item"><label class="field"><span>New note</span><textarea class="input" id="nd-${it.id}" rows="3" oninput="noteDraft['${k}']=this.value" placeholder="e.g. Drain plug torque 27 ft-lb">${esc(noteDraft[k]||"")}</textarea></label><div class="actions" style="margin-top:8px"><button class="btn sm primary" data-post="${it.id}" onclick="postNote('${v.id}','${it.id}')">Post note</button></div>${offer&&offer.vid===v.id&&offer.taskId===it.id?offerHTML():""}</div></div>`}
+ return h+`</div>`}
+function toggleNotes(vid,id){const k=vid+"|"+id;openNotes[k]=!openNotes[k];render()}
+function postNote(vid,id){const k=vid+"|"+id,t=(noteDraft[k]||"").trim();if(!t)return toast("Type a note first");
+ set(()=>{const it=findItem(vid,id);it.noteLog=it.noteLog||[];it.noteLog.push({id:nid(),text:t,postedAt:new Date().toISOString()});noteDraft[k]="";const d=detectSpec(t);offer=d?{...d,vid,taskId:id}:null;if(!d)offer=null});toast("Note posted")}
+function saveNoteEdit(vid,id,n){const t=document.getElementById("ne-"+n).value.trim();if(!t)return;set(()=>{const x=findItem(vid,id).noteLog.find(y=>y.id===n);x.text=t;x.editedAt=new Date().toISOString();noteEditing=null;const d=detectSpec(t);offer=d?{...d,vid,taskId:id}:null})}
+function delNote(vid,id,n){if(!confirm("Delete this note?"))return;set(()=>{const it=findItem(vid,id);it.noteLog=it.noteLog.filter(y=>y.id!==n)});toast("Note deleted")}
+// ---------- Spec detection ----------
+const UNITS=[[/(?:ft\.?[\s-]?lbs?|foot[\s-]?pounds?|lb\.?[\s-]?ft|ft·lb)/,"ft-lb","Torque"],[/(?:in\.?[\s-]?lbs?|inch[\s-]?pounds?)/,"in-lb","Torque"],[/(?:n·m|n-m|nm|newton[\s-]?met(?:er|re)s?)/,"N·m","Torque"],
+ [/psi/,"psi","Other"],[/(?:qts?|quarts?)/,"qt","Fluids & capacities"],[/(?:ml|millilit(?:er|re)s?)/,"ml","Fluids & capacities"],[/(?:l|lit(?:er|re)s?)/,"L","Fluids & capacities"],
+ [/(?:°|deg(?:rees?)?)\s*btdc/,"° BTDC","Electrical"],[/(?:°|deg(?:rees?)?)/,"°","Other"],[/rpm/,"rpm","Other"],[/mm/,"mm","Other"],[/(?:in(?:ch(?:es)?)?|")/,"in","Other"]];
+function detectSpec(text){const t=text.trim(),low=t.toLowerCase();
+ const g=t.match(/\b(\d{1,2}W-?\d{2})\b/i);
+ for(const [re,unit,topic] of UNITS){const m=low.match(new RegExp("(\\d+(?:\\.\\d+)?)\\s*(?:-\\s*)?"+re.source+"(?![a-z])"));if(m){let name=t.slice(0,m.index).replace(/[\s:=,-]+$/,"").replace(/\b(is|of|at|to|spec|=)\s*$/i,"").trim();
+  let tp=topic;if(/gap/i.test(low))tp="Electrical";if(!name)name=t.slice(m.index+m[0].length).trim().slice(0,40);return {name:name.charAt(0).toUpperCase()+name.slice(1),value:m[1],unit,topic:tp}}}
+ if(g)return {name:t.replace(g[0],"").replace(/[\s:=,-]+$/,"").trim()||"Engine oil",value:g[1].toUpperCase(),unit:"",topic:"Oil"};
+ const pn=t.match(/\b([0-9A-Z]{3,6}-[0-9A-Z]{3,6}(?:-[0-9A-Z]{2,3})?|[0-9]{2}[A-Z][0-9]{6}[A-Z]?)\b/);
+ if(pn)return {name:t.replace(pn[0],"").replace(/[\s:=,-]+$/,"").trim()||"Part number",value:pn[1],unit:"",topic:"Part numbers"};return null}
+const TOPICS=["Torque","Fluids & capacities","Oil","Part numbers","Electrical","Other"];
+function offerHTML(){const o=offer;return `<div class="offer" id="specOffer"><b>Save as spec?</b><div class="sub" style="margin-bottom:8px">This note looks like a spec. Check the fields, then save. Nothing is saved until you confirm.</div><div class="form">
+ <label class="field full"><span>Name</span><input class="input" id="of-name" value="${esc(o.name)}"></label><label class="field"><span>Value</span><input class="input" id="of-value" value="${esc(o.value)}"></label><label class="field"><span>Unit</span><input class="input" id="of-unit" value="${esc(o.unit)}"></label>
+ <label class="field full"><span>Topic</span><select class="input" id="of-topic">${TOPICS.map(x=>`<option ${x===o.topic?"selected":""}>${x}</option>`).join("")}</select></label>
+ <div class="field full"><div class="actions"><button class="btn sm primary" id="of-save" onclick="saveOffer()">Save spec</button><button class="btn sm" onclick="offer=null;render()">Not now</button></div></div></div></div>`}
+function saveOffer(){const g=k=>document.getElementById("of-"+k).value.trim();if(!g("name")||!g("value"))return toast("Name and value are required");const o=offer;
+ set(()=>{const now=new Date().toISOString();G.specs.push({id:"sp-"+nid(),vehicleId:o.vid,topic:g("topic"),name:g("name"),value:g("value"),unit:g("unit"),notes:"From a note on "+(findItem(o.vid,o.taskId)||{}).label,taskIds:[o.taskId],createdAt:now,updatedAt:now});offer=null});toast("Spec saved")}
+// ---------- Specs view ----------
+let specEdit=null;
+function specMatches(sp,q){if(!q)return true;const hay=[sp.name,sp.value,sp.unit,sp.topic,sp.notes].join(" ").toLowerCase();return q.toLowerCase().split(/\s+/).filter(Boolean).every(w=>hay.includes(w))}
+function specRow(sp){const v=G.vehicles.find(x=>x.id===sp.vehicleId);const links=(sp.taskIds||[]).map(t=>(findItem(sp.vehicleId,t)||{}).label).filter(Boolean);
+ return `<div class="list-row spec-row" data-spec="${sp.id}"><div class="grow"><b>${esc(sp.name)}</b><div style="font-size:16px;font-weight:600;font-variant-numeric:tabular-nums">${esc(sp.value)}${sp.unit?" "+esc(sp.unit):""}</div><div class="sub">${esc(v?vName(v):"Unknown vehicle")} · ${esc(sp.topic)}${links.length?" · Task: "+links.map(esc).join(", "):""}</div>${sp.notes?`<div class="sub">${esc(sp.notes)}</div>`:""}<div class="sub">Updated ${fmtD(sp.updatedAt)}</div></div><div class="actions"><button class="btn sm" onclick="specEdit='${sp.id}';render();window.scrollTo(0,0)">Edit</button><button class="btn sm danger" onclick="delSpec('${sp.id}')">Delete</button></div></div>`}
+function viewSpecs(){const u=G.ui;u.specVeh=u.specVeh||"all";u.specTopic=u.specTopic||"all";u.specQ=u.specQ||"";const all=G.specs||[];
+ const list=all.filter(x=>(u.specVeh==="all"||x.vehicleId===u.specVeh)&&(u.specTopic==="all"||x.topic===u.specTopic)&&specMatches(x,u.specQ));
+ const e=specEdit&&specEdit!=="new"?all.find(x=>x.id===specEdit)||{}:{vehicleId:G.activeVehicleId,topic:"Torque",taskIds:[]};const ev=G.vehicles.find(x=>x.id===e.vehicleId)||V();
+ const form=specEdit?`<section class="card" id="specForm"><div class="card-h"><h2>${e.id?"Edit spec":"Add spec"}</h2></div><div class="card-b"><div class="form">
+ <label class="field full"><span>Vehicle (required)</span>${vehSelect("sfveh",e.vehicleId)}</label>
+ <label class="field"><span>Topic</span><select class="input" id="sftopic">${TOPICS.map(x=>`<option ${x===e.topic?"selected":""}>${x}</option>`).join("")}</select></label>
+ <label class="field"><span>Name *</span><input class="input" id="sfname" value="${esc(e.name||"")}" placeholder="Oil drain plug"></label>
+ <label class="field"><span>Value *</span><input class="input" id="sfvalue" value="${esc(e.value||"")}"></label><label class="field"><span>Unit</span><input class="input" id="sfunit" value="${esc(e.unit||"")}" placeholder="ft-lb"></label>
+ <label class="field full"><span>Linked task (${esc(vName(ev))})</span><select class="input" id="sftask"><option value="">None</option>${vItems(ev).map(x=>`<option value="${x.it.id}" ${(e.taskIds||[]).includes(x.it.id)?"selected":""}>${esc(x.sec)} · ${esc(x.it.label)}</option>`).join("")}</select></label>
+ <label class="field full"><span>Notes / source</span><input class="input" id="sfnotes" value="${esc(e.notes||"")}"></label>
+ <div class="field full"><div class="err" id="sferr" role="alert"></div><div class="actions"><button class="btn primary" id="sfsave" onclick="saveSpec('${e.id||""}')">Save spec</button><button class="btn" onclick="specEdit=null;render()">Cancel</button></div></div></div></div></section>`:"";
+ const byT={};list.forEach(x=>{(byT[x.topic]=byT[x.topic]||[]).push(x)});
+ return form+`<section class="card"><div class="card-h"><h2>Find a spec</h2><span class="meta" id="specCount">${list.length} of ${all.length}</span></div><div class="card-b"><div class="form">
+ <label class="field full"><span>Search</span><input class="input" id="specQ" type="search" value="${esc(u.specQ)}" placeholder="e.g. drain plug torque" oninput="G.ui.specQ=this.value;save();clearTimeout(viewSpecs.h);viewSpecs.h=setTimeout(()=>{const p=this.selectionStart;render();const i=document.getElementById('specQ');i.focus();i.setSelectionRange(p,p)},150)"></label>
+ <label class="field"><span>Vehicle</span><select class="input" id="specVeh" onchange="set(()=>G.ui.specVeh=this.value)"><option value="all">All vehicles</option>${G.vehicles.map(v=>`<option value="${v.id}" ${u.specVeh===v.id?"selected":""}>${esc(vName(v))}</option>`).join("")}</select></label>
+ <label class="field"><span>Topic</span><select class="input" id="specTopic" onchange="set(()=>G.ui.specTopic=this.value)"><option value="all">All topics</option>${TOPICS.map(x=>`<option ${u.specTopic===x?"selected":""}>${x}</option>`).join("")}</select></label></div></div></section>`+
+ (specEdit?"":`<div class="actions" style="margin-bottom:16px"><button class="btn primary" id="addSpec" onclick="specEdit='new';render()">Add spec</button></div>`)+
+ (all.length?(list.length?Object.entries(byT).map(([t,xs])=>`<section class="card"><div class="card-h"><h2>${esc(t)}</h2><span class="meta">${xs.length}</span></div>${xs.map(specRow).join("")}</section>`).join(""):`<section class="card"><div class="card-b sub">No specs match. Try fewer words or clear the filters.</div></section>`)
+ :`<section class="card"><div class="card-b"><b>No specs saved yet</b><p class="sub" style="margin-bottom:0">Add torque values, capacities, oil grades and part numbers here, or post a note on a checklist item like "Drain plug torque 27 ft-lb" and save it as a spec.</p></div></section>`)}
+function saveSpec(id){const g=k=>document.getElementById("sf"+k).value.trim(),err=document.getElementById("sferr");const vid=g("veh");
+ if(!vid||!G.vehicles.some(v=>v.id===vid)){err.textContent="Select a vehicle from your garage before saving.";return}if(!g("name")||!g("value")){err.textContent="Name and value are required.";return}
+ const now=new Date().toISOString(),task=g("task");const data={vehicleId:vid,topic:g("topic"),name:g("name"),value:g("value"),unit:g("unit"),notes:g("notes"),taskIds:task&&findItem(vid,task)?[task]:[],updatedAt:now};
+ set(()=>{if(id){const x=G.specs.find(y=>y.id===id);Object.assign(x,data)}else G.specs.push({id:"sp-"+nid(),createdAt:now,...data});specEdit=null});toast("Spec saved")}
+function delSpec(id){if(!confirm("Delete this spec?"))return;set(()=>{G.specs=G.specs.filter(x=>x.id!==id)});toast("Spec deleted")}
+// ---------- Surface specs on check ----------
+const STOP=new Set(["and","the","with","check","replace","inspection","inspect","condition","level","from","for","this","that","front","rear"]);
+function specsForItem(vid,id){const it=findItem(vid,id);if(!it)return[];const words=it.label.toLowerCase().split(/[^a-z0-9]+/).filter(w=>w.length>3&&!STOP.has(w));
+ return (G.specs||[]).filter(sp=>sp.vehicleId===vid&&((sp.taskIds||[]).includes(id)||words.some(w=>sp.name.toLowerCase().includes(w))))}
+function surfaceSpecs(vid,id){const sps=specsForItem(vid,id);const sh=document.getElementById("sheet");if(!sps.length){sh.hidden=true;return}
+ sh.innerHTML=`<div style="max-width:880px;margin:0 auto"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3>Specs for ${esc(findItem(vid,id).label)}</h3><button class="btn sm" onclick="document.getElementById('sheet').hidden=true">Close</button></div>${sps.map(sp=>`<div class="sub spec-hit" style="color:var(--text);padding:4px 0"><b>${esc(sp.name)}</b>: ${esc(sp.value)}${sp.unit?" "+esc(sp.unit):""} <span class="sub">(${esc(sp.topic)})</span></div>`).join("")}</div>`;sh.hidden=false}
+const _updBase=upd;upd=function(vid,id,f,v,logIt){_updBase(vid,id,f,v,logIt);if(f==="checked"&&v)surfaceSpecs(vid,id)};
 function render(){const v=V(),t=(VIEWS.find(x=>x[0]===G.ui.view)||VIEWS[0]);if(!VIEWS.some(x=>x[0]===G.ui.view))G.ui.view="garage";
  document.getElementById("viewTitle").textContent=t[1];document.getElementById("vehChip").textContent=vName(v);document.title=t[1]+" · Garage Tracker";
  document.getElementById("nav").innerHTML=navHTML();
- const f={garage:viewGarage,checklist:viewChecklist,tasks:viewTasks,log:viewLog,diag:viewDiag,io:viewIO,parts:viewParts,about:viewAbout}[t[0]];document.getElementById("app").innerHTML=f()}
+ const f={garage:viewGarage,checklist:viewChecklist,tasks:viewTasks,log:viewLog,diag:viewDiag,io:viewIO,parts:viewParts,specs:viewSpecs,about:viewAbout}[t[0]];document.getElementById("app").innerHTML=f()}
 (async()=>{try{await idb();let s=await load();if(!s){try{const ls=localStorage.getItem("toyota22re-tracker-v1");if(ls)s=JSON.parse(ls)}catch(e){}}G=migrate(s);save();if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){toast("Storage unavailable; use Export")}render()})();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 
